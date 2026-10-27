@@ -1,7 +1,8 @@
-RandomContentVery Interesting
+### Записи по работе %% fold %% 
 
-gkj;sgkd
-sfkg;dkfkg
-sldgk;lsfkg
-
-#TestTagNaxoy
+###### === Tags and Descs idXXXX
+- #AWEffective_id4839
+  КамАЗ приблизительно 7-8 кубов щебня вручную с телегой 2 человека распределяют на карте 40кв.м за 2 часа [[attach/IMG_20261022_153711 1.jpg|Фото]]
+###### === Tags and Descs idXXXX
+- #AWEffective_id4839
+  Средний объем телеги, которую я перевожу за раз - 50 литров или 0.05куба щебня . Максимальная загрузка телеги - 130л. Это посчитана на практике [[attach/IMG_20261024_142254.jpg|Фото телеги]]
