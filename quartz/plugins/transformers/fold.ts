@@ -43,76 +43,98 @@ export const FoldHeaders: QuartzTransformerPlugin = () => ({
         contentType: "inline",
         script: `
           (() => {
-            const init = () => {
-              document.querySelectorAll("h1, h2, h3, h4, h5, h6")
-                .forEach((heading) => {
-                  const marker = heading.querySelector(
-                    ".quartz-fold-marker"
-                  )
+  let folds = []
 
-                  if (
-                    !marker ||
-                    heading.dataset.quartzFoldReady === "true"
-                  ) return
+  const applyVisibility = () => {
+    const managed = new Set()
+    const hidden = new Set()
 
-                  marker.remove()
-                  heading.dataset.quartzFoldReady = "true"
+    folds.forEach((fold) => {
+      fold.blocks.forEach((block) => {
+        managed.add(block)
 
-                  const level = Number(heading.tagName.slice(1))
-                  const blocks = []
-                  let next = heading.nextElementSibling
+        if (fold.button.getAttribute("aria-expanded") !== "true") {
+          hidden.add(block)
+        }
+      })
+    })
 
-                  while (next) {
-                    const match = next.tagName.match(/^H([1-6])$/)
+    managed.forEach((block) => {
+      block.hidden = hidden.has(block)
+    })
+  }
 
-                    if (match && Number(match[1]) <= level) break
+  const init = () => {
+    const headings = Array.from(
+      document.querySelectorAll("h1, h2, h3, h4, h5, h6")
+    )
 
-                    blocks.push(next)
-                    next = next.nextElementSibling
-                  }
+    headings.forEach((heading) => {
+      const marker = heading.querySelector(".quartz-fold-marker")
 
-                  const button = document.createElement("button")
-                  button.type = "button"
-                  button.textContent = "▸"
-                  button.setAttribute("aria-expanded", "false")
-                  button.setAttribute("aria-label", "Раскрыть раздел")
-                  button.style.cssText =
-                    "margin-right:.4em;padding:0;border:0;" +
-                    "background:transparent;color:var(--secondary);" +
-                    "font:inherit;cursor:pointer"
+      if (!marker || heading.dataset.quartzFoldReady === "true") return
 
-                  heading.prepend(button)
-                  blocks.forEach((block) => {
-                    block.hidden = true
-                  })
+      marker.remove()
+      heading.dataset.quartzFold = "true"
+      heading.dataset.quartzFoldReady = "true"
 
-                  button.addEventListener("click", (event) => {
-                    event.preventDefault()
-                    event.stopPropagation()
+      const button = document.createElement("button")
+      button.type = "button"
+      button.textContent = "▸"
+      button.setAttribute("aria-expanded", "false")
+      button.setAttribute("aria-label", "Раскрыть раздел")
+      button.style.cssText =
+        "margin-right:.4em;padding:0;border:0;" +
+        "background:transparent;color:var(--secondary);" +
+        "font:inherit;cursor:pointer"
 
-                    const expanded =
-                      button.getAttribute("aria-expanded") !== "true"
+      heading.prepend(button)
 
-                    button.setAttribute(
-                      "aria-expanded",
-                      String(expanded)
-                    )
-                    button.setAttribute(
-                      "aria-label",
-                      expanded ? "Свернуть раздел" : "Раскрыть раздел"
-                    )
-                    button.textContent = expanded ? "▾" : "▸"
+      button.addEventListener("click", (event) => {
+        event.preventDefault()
+        event.stopPropagation()
 
-                    blocks.forEach((block) => {
-                      block.hidden = !expanded
-                    })
-                  })
-                })
-            }
+        const expanded =
+          button.getAttribute("aria-expanded") !== "true"
 
-            document.addEventListener("nav", init)
-            init()
-          })()
+        button.setAttribute("aria-expanded", String(expanded))
+        button.setAttribute(
+          "aria-label",
+          expanded ? "Свернуть раздел" : "Раскрыть раздел"
+        )
+        button.textContent = expanded ? "▾" : "▸"
+
+        applyVisibility()
+      })
+    })
+
+    folds = headings
+      .filter((heading) => heading.dataset.quartzFold === "true")
+      .map((heading) => {
+        const level = Number(heading.tagName.slice(1))
+        const button = heading.querySelector("button")
+        const blocks = []
+        let next = heading.nextElementSibling
+
+        while (next) {
+          const match = next.tagName.match(/^H([1-6])$/)
+
+          if (match && Number(match[1]) <= level) break
+
+          blocks.push(next)
+          next = next.nextElementSibling
+        }
+
+        return { heading, button, blocks }
+      })
+      .filter((fold) => fold.button)
+
+    applyVisibility()
+  }
+
+  document.addEventListener("nav", init)
+  init()
+})()
         `,
       }],
     }
